@@ -2,6 +2,8 @@ import { useMemo, useState } from "react";
 import { Banknote, CalendarDays, ListOrdered, Package, Plus, ShoppingBag, Trash2 } from "lucide-react";
 import { Empty } from "../components/Empty";
 import { Stat } from "../components/Stat";
+import { TablePagination } from "../components/TablePagination";
+import { usePagination } from "../hooks/usePagination";
 import { productCategoryLabel } from "../lib/products";
 import {
   currentYearMonth,
@@ -81,6 +83,9 @@ export function VentasSection({
     }
     return { count: monthSales.length, totalCents, cashCents, transferCents, units };
   }, [monthSales]);
+
+  const salesPage = usePagination(monthSales, 15, month);
+  const catalogPage = usePagination(products, 15);
 
   async function submitSale(e: React.FormEvent) {
     e.preventDefault();
@@ -417,7 +422,7 @@ export function VentasSection({
                   </tr>
                 </thead>
                 <tbody>
-                  {products.map((p) => (
+                  {catalogPage.slice.map((p) => (
                     <ProductRow
                       key={p.id}
                       product={p}
@@ -427,6 +432,14 @@ export function VentasSection({
                   ))}
                 </tbody>
               </table>
+              <TablePagination
+                page={catalogPage.page}
+                totalPages={catalogPage.totalPages}
+                total={catalogPage.total}
+                from={catalogPage.from}
+                to={catalogPage.to}
+                onPageChange={catalogPage.setPage}
+              />
             </div>
           ) : (
             <Empty text="Sin productos en el catálogo." />
@@ -452,7 +465,7 @@ export function VentasSection({
               </tr>
             </thead>
             <tbody>
-              {monthSales.map((s) => (
+              {salesPage.slice.map((s) => (
                 <tr key={s.id}>
                   <td>{s.product_name}</td>
                   <td>
@@ -479,6 +492,14 @@ export function VentasSection({
               ))}
             </tbody>
           </table>
+          <TablePagination
+            page={salesPage.page}
+            totalPages={salesPage.totalPages}
+            total={salesPage.total}
+            from={salesPage.from}
+            to={salesPage.to}
+            onPageChange={salesPage.setPage}
+          />
         </div>
       ) : (
         <Empty

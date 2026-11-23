@@ -2,6 +2,8 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { BarChart3, CalendarDays, Users, Wallet } from "lucide-react";
 import { Empty } from "../components/Empty";
 import { Stat } from "../components/Stat";
+import { TablePagination } from "../components/TablePagination";
+import { usePagination } from "../hooks/usePagination";
 import { apiErrorMessage, readJsonResponse } from "../lib/api";
 import { isGymOpenOnDate } from "../lib/gymSchedule";
 import { currentYearMonth, date, money, monthLabel } from "../lib/format";
@@ -63,6 +65,9 @@ export function ReportesSection({ onError }: ReportesSectionProps) {
     () => Math.max(1, ...(report?.exercises.map((e) => e.count) ?? [1])),
     [report]
   );
+
+  const attendanceByDate = report?.attendance.by_date ?? [];
+  const attendanceDatesPage = usePagination(attendanceByDate, 15, month);
 
   return (
     <section className="panel">
@@ -282,7 +287,7 @@ export function ReportesSection({ onError }: ReportesSectionProps) {
                     </tr>
                   </thead>
                   <tbody>
-                    {report.attendance.by_date.map((row) => (
+                    {attendanceDatesPage.slice.map((row) => (
                       <tr key={row.date}>
                         <td>{date(row.date)}</td>
                         <td className="right">{row.visit_count}</td>
@@ -290,6 +295,14 @@ export function ReportesSection({ onError }: ReportesSectionProps) {
                     ))}
                   </tbody>
                 </table>
+                <TablePagination
+                  page={attendanceDatesPage.page}
+                  totalPages={attendanceDatesPage.totalPages}
+                  total={attendanceDatesPage.total}
+                  from={attendanceDatesPage.from}
+                  to={attendanceDatesPage.to}
+                  onPageChange={attendanceDatesPage.setPage}
+                />
               </div>
             ) : (
               <p className="workout-form-hint">No hay días con asistencia marcada en este mes.</p>

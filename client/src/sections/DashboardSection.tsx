@@ -1,6 +1,8 @@
 import { Activity, CreditCard, Dumbbell, MessageCircle, Users, Wallet } from "lucide-react";
 import { Empty } from "../components/Empty";
 import { Stat } from "../components/Stat";
+import { TablePagination } from "../components/TablePagination";
+import { usePagination } from "../hooks/usePagination";
 import { date, money, paymentMethodLabel } from "../lib/format";
 import { buildWhatsAppHref, membershipExpiryWhatsAppMessage } from "../lib/whatsapp";
 import type { Dashboard } from "../types";
@@ -12,6 +14,9 @@ type DashboardSectionProps = {
 };
 
 export function DashboardSection({ dashboard, memberCount, onOpenPagos }: DashboardSectionProps) {
+  const expiringSoon = dashboard?.expiringSoon ?? [];
+  const expiringPage = usePagination(expiringSoon, 15);
+
   return (
     <section>
       <div className="welcome">
@@ -60,7 +65,7 @@ export function DashboardSection({ dashboard, memberCount, onOpenPagos }: Dashbo
           </div>
         </div>
 
-        {dashboard?.expiringSoon?.length ? (
+        {expiringSoon.length ? (
           <div className="table-wrap">
             <table>
               <thead>
@@ -73,7 +78,7 @@ export function DashboardSection({ dashboard, memberCount, onOpenPagos }: Dashbo
                 </tr>
               </thead>
               <tbody>
-                {dashboard.expiringSoon.map((row) => {
+                {expiringPage.slice.map((row) => {
                   const wa = buildWhatsAppHref(
                     row.phone,
                     membershipExpiryWhatsAppMessage(
@@ -109,6 +114,14 @@ export function DashboardSection({ dashboard, memberCount, onOpenPagos }: Dashbo
                 })}
               </tbody>
             </table>
+            <TablePagination
+              page={expiringPage.page}
+              totalPages={expiringPage.totalPages}
+              total={expiringPage.total}
+              from={expiringPage.from}
+              to={expiringPage.to}
+              onPageChange={expiringPage.setPage}
+            />
           </div>
         ) : (
           <Empty text="Nadie con membresía activa vence en los próximos 7 días." />

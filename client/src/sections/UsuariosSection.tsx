@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { BodyMetricsModal } from "../components/BodyMetricsModal";
+import { TablePagination } from "../components/TablePagination";
+import { usePagination } from "../hooks/usePagination";
 import { Pencil, Plus, Scale, Search } from "lucide-react";
 import { CompanionFields } from "../components/CompanionFields";
 import { Empty } from "../components/Empty";
@@ -51,6 +53,7 @@ export function UsuariosSection({
   const filtered = members.filter((m) =>
     `${m.first_name} ${m.last_name} ${m.phone}`.toLowerCase().includes(search.toLowerCase())
   );
+  const usersPage = usePagination(filtered, 15, search);
 
   function startEdit(m: Member) {
     setEditingId(m.id);
@@ -411,7 +414,7 @@ export function UsuariosSection({
               </tr>
             </thead>
             <tbody>
-              {filtered.map((m) => (
+              {usersPage.slice.map((m) => (
                 <tr key={m.id}>
                   <td className="member-name">
                     {m.first_name} {m.last_name}
@@ -447,6 +450,14 @@ export function UsuariosSection({
               ))}
             </tbody>
           </table>
+          <TablePagination
+            page={usersPage.page}
+            totalPages={usersPage.totalPages}
+            total={usersPage.total}
+            from={usersPage.from}
+            to={usersPage.to}
+            onPageChange={usersPage.setPage}
+          />
         </div>
       ) : (
         <Empty

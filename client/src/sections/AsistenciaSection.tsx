@@ -4,6 +4,8 @@ import { ActivityCalendarModal } from "../components/ActivityCalendarModal";
 import { TodayWorkoutsPanel } from "../components/TodayWorkoutsPanel";
 import { WorkoutLogModal } from "../components/WorkoutLogModal";
 import { Empty } from "../components/Empty";
+import { TablePagination } from "../components/TablePagination";
+import { usePagination } from "../hooks/usePagination";
 import { formatCompanionCell } from "../lib/companions";
 import {
   date,
@@ -45,6 +47,7 @@ export function AsistenciaSection({
 
   const q = search.toLowerCase().trim();
   const filtered = summary.filter((row) => row.member_name.toLowerCase().includes(q));
+  const attendancePage = usePagination(filtered, 15, search);
 
   async function openHistory(memberId: number) {
     setHistoryBusy(true);
@@ -113,7 +116,7 @@ export function AsistenciaSection({
               </tr>
             </thead>
             <tbody>
-              {filtered.map((row) => {
+              {attendancePage.slice.map((row) => {
                 const vigente =
                   row.current_kind === "membership" &&
                   membershipDatesVigente(row.current_start, row.current_end);
@@ -181,6 +184,14 @@ export function AsistenciaSection({
               })}
             </tbody>
           </table>
+          <TablePagination
+            page={attendancePage.page}
+            totalPages={attendancePage.totalPages}
+            total={attendancePage.total}
+            from={attendancePage.from}
+            to={attendancePage.to}
+            onPageChange={attendancePage.setPage}
+          />
         </div>
       ) : (
         <Empty

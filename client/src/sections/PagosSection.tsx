@@ -2,6 +2,8 @@ import { useMemo, useState } from "react";
 import { Banknote, CalendarDays, ListOrdered, Wallet } from "lucide-react";
 import { Empty } from "../components/Empty";
 import { Stat } from "../components/Stat";
+import { TablePagination } from "../components/TablePagination";
+import { usePagination } from "../hooks/usePagination";
 import {
   currentYearMonth,
   date,
@@ -47,6 +49,8 @@ export function PagosSection({ payments }: PagosSectionProps) {
       transferCents,
     };
   }, [monthPayments]);
+
+  const paymentsPage = usePagination(monthPayments, 15, month);
 
   return (
     <section className="panel">
@@ -110,7 +114,7 @@ export function PagosSection({ payments }: PagosSectionProps) {
               </tr>
             </thead>
             <tbody>
-              {monthPayments.map((p) => (
+              {paymentsPage.slice.map((p) => (
                 <tr key={p.id}>
                   <td>{p.member_name}</td>
                   <td>
@@ -125,6 +129,14 @@ export function PagosSection({ payments }: PagosSectionProps) {
               ))}
             </tbody>
           </table>
+          <TablePagination
+            page={paymentsPage.page}
+            totalPages={paymentsPage.totalPages}
+            total={paymentsPage.total}
+            from={paymentsPage.from}
+            to={paymentsPage.to}
+            onPageChange={paymentsPage.setPage}
+          />
         </div>
       ) : (
         <Empty

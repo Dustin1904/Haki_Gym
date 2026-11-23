@@ -2,6 +2,8 @@ import { useMemo, useState } from "react";
 import { Pencil, RefreshCw, Search } from "lucide-react";
 import { CompanionFields } from "../components/CompanionFields";
 import { Empty } from "../components/Empty";
+import { TablePagination } from "../components/TablePagination";
+import { usePagination } from "../hooks/usePagination";
 import {
   companionsForApi,
   emptyCompanion,
@@ -96,11 +98,18 @@ export function MembresiasSection({
     [filteredMemberships, latestActiveIdByMember]
   );
 
-  const visitOnlyMembers = members
-    .filter((m) => !activeMemberIds.has(m.id))
-    .filter((m) =>
-      `${m.first_name} ${m.last_name} ${m.phone} ${m.email} ${m.notes}`.toLowerCase().includes(q)
-    );
+  const visitOnlyMembers = useMemo(
+    () =>
+      members
+        .filter((m) => !activeMemberIds.has(m.id))
+        .filter((m) =>
+          `${m.first_name} ${m.last_name} ${m.phone} ${m.email} ${m.notes}`.toLowerCase().includes(q)
+        ),
+    [members, activeMemberIds, q]
+  );
+
+  const membershipsPage = usePagination(currentMemberships, 15, search);
+  const visitPage = usePagination(visitOnlyMembers, 15, search);
 
   function startEdit(row: MembershipRow) {
     setRenewMember(null);
@@ -469,7 +478,7 @@ export function MembresiasSection({
               </tr>
             </thead>
             <tbody>
-              {currentMemberships.map((row) => {
+              {membershipsPage.slice.map((row) => {
                 const vigente = membershipDatesVigente(row.start_date, row.end_date);
                 return (
                   <tr key={row.id}>
@@ -513,6 +522,14 @@ export function MembresiasSection({
               })}
             </tbody>
           </table>
+          <TablePagination
+            page={membershipsPage.page}
+            totalPages={membershipsPage.totalPages}
+            total={membershipsPage.total}
+            from={membershipsPage.from}
+            to={membershipsPage.to}
+            onPageChange={membershipsPage.setPage}
+          />
         </div>
       ) : (
         <Empty
@@ -542,7 +559,7 @@ export function MembresiasSection({
               </tr>
             </thead>
             <tbody>
-              {visitOnlyMembers.map((m) => (
+              {visitPage.slice.map((m) => (
                 <tr key={m.id}>
                   <td className="member-name">
                     {m.first_name} {m.last_name}
@@ -574,6 +591,14 @@ export function MembresiasSection({
               ))}
             </tbody>
           </table>
+          <TablePagination
+            page={visitPage.page}
+            totalPages={visitPage.totalPages}
+            total={visitPage.total}
+            from={visitPage.from}
+            to={visitPage.to}
+            onPageChange={visitPage.setPage}
+          />
         </div>
       ) : (
         <Empty
