@@ -1,0 +1,15 @@
+{
+  "name": "gymadmin-local-postgres",
+  "private": true,
+  "version": "0.2.0",
+  "scripts": {
+    "install:all": "npm --prefix server install && npm --prefix client install",
+    "dev": "concurrently -k \"npm --prefix server run dev\" \"npm --prefix client run dev\"",
+    "build": "npm --prefix client run build",
+    "db:backup": "npm --prefix server run db:backup",
+    "db:restore": "npm --prefix server run db:restore"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}
